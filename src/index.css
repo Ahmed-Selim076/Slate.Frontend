@@ -1,0 +1,678 @@
+@import "tailwindcss";
+
+@theme {
+  /* Calm, warm, natural light base — the site's default look */
+  --color-bg: #FBFAF7;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F5F3EE;
+  --color-border: rgba(28, 27, 24, 0.07);
+  --color-border-hover: rgba(28, 27, 24, 0.15);
+
+  /* Text */
+  --color-text: #23221F;
+  --color-text-dim: #858176;
+
+  /* One coordinated accent family — soft sage/emerald, used deliberately and sparingly */
+  --color-accent: #1E9370;
+  --color-accent-soft: rgba(30, 147, 112, 0.12);
+  --color-accent-strong: #167A5C;
+
+  /* Secondary accent, used only for collaborator cursors / small highlights */
+  --color-accent-2: #4A63D6;
+  --color-accent-3: #C17A2E;
+
+  --color-success: #1E9370;
+  --color-warning: #C17A2E;
+  --color-danger: #D14850;
+
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-note: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+/* Dark theme — optional alternate, toggled via data-theme="dark" on <html>, see src/lib/theme.ts */
+:root[data-theme="dark"] {
+  --color-bg: #101113;
+  --color-surface: #17181B;
+  --color-surface-elevated: #1D1F23;
+  --color-border: rgba(237, 237, 239, 0.09);
+  --color-border-hover: rgba(237, 237, 239, 0.18);
+
+  --color-text: #EDEDEF;
+  --color-text-dim: #8B8D98;
+
+  --color-accent: #2FBE8F;
+  --color-accent-soft: rgba(47, 190, 143, 0.12);
+  --color-accent-strong: #23A67C;
+
+  --color-accent-2: #6C8CF5;
+  --color-accent-3: #E5A15C;
+
+  --color-success: #2FBE8F;
+  --color-warning: #E5A15C;
+  --color-danger: #E5686E;
+}
+
+html, body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.panel-elevated {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #082A20;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+}
+.btn-primary:hover {
+  transform: scale(1.035);
+  box-shadow: 0 0 0 6px var(--color-accent-soft);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+  transition-duration: 0.15s;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-hover);
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.btn-secondary:hover {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-text-dim);
+}
+
+/* Thin animated underline field — grows from center on focus, calm and slow */
+.field-wrap {
+  position: relative;
+}
+.field-underline-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-hover);
+  padding: 8px 2px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  outline: none;
+}
+.field-underline-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1.5px;
+  width: 100%;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+}
+.field-underline-input:focus ~ .field-underline-bar {
+  transform: scaleX(1);
+}
+
+/* Smooth, restrained entrance animation — fade + gentle rise, no bounce */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fade-up.d1 { animation-delay: 0.08s; }
+.fade-up.d2 { animation-delay: 0.16s; }
+.fade-up.d3 { animation-delay: 0.24s; }
+.fade-up.d4 { animation-delay: 0.32s; }
+
+@keyframes doodle-loop {
+  0%   { stroke-dashoffset: 900; opacity: 0; }
+  15%  { opacity: 1; }
+  60%  { stroke-dashoffset: 0; opacity: 1; }
+  85%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.doodle-loop {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: doodle-loop 4.5s ease-in-out infinite;
+}
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 0.9; }
+  50%      { opacity: 1; }
+}
+
+/* Slow drifting gradient orbs behind the hero — the one signature motion moment */
+@keyframes drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, -30px) scale(1.08); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-35px, 25px) scale(1.05); }
+}
+.orb-a { animation: drift-a 16s ease-in-out infinite; }
+.orb-b { animation: drift-b 20s ease-in-out infinite; }
+
+.dot-grid-bg {
+  background-image: radial-gradient(rgba(237,237,239,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Nav link animated underline */
+.nav-link {
+  position: relative;
+  transition: color 0.15s ease;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1.5px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-link:hover {
+  color: var(--color-text);
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Feature card idle icon animations */
+@keyframes icon-orbit {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(4px, -3px); }
+  50%  { transform: translate(1px, 2px); }
+  75%  { transform: translate(-3px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+.icon-orbit {
+  animation: icon-orbit 3.2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+.icon-pulse {
+  animation: icon-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes icon-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+.icon-bounce {
+  animation: icon-bounce 1.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   Chess capture impact effects — intensity scales with the
+   captured piece's value: pawn (light) → minor piece → rook →
+   queen (biggest, with a board shake).
+   ============================================================ */
+.capture-fx {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Pawn — quick, subtle flash */
+@keyframes capture-pop-p {
+  0%   { transform: scale(0.55); opacity: 0.5; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+.capture-fx-p {
+  animation: capture-pop-p 0.32s ease-out forwards;
+  background: radial-gradient(circle, var(--color-danger) 0%, transparent 72%);
+}
+
+/* Knight / Bishop — more energy, a little spin */
+@keyframes capture-pop-nb {
+  0%   { transform: scale(0.5) rotate(0deg); opacity: 0.75; }
+  55%  { transform: scale(1.35) rotate(110deg); opacity: 0.55; }
+  100% { transform: scale(1.85) rotate(190deg); opacity: 0; }
+}
+.capture-fx-n, .capture-fx-b {
+  animation: capture-pop-nb 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background: radial-gradient(circle, var(--color-danger) 0%, transparent 68%);
+}
+
+/* Rook — stronger burst with an expanding ring */
+@keyframes capture-pop-r {
+  0%   { transform: scale(0.4); opacity: 0.9; box-shadow: 0 0 0 0 rgba(209, 72, 80, 0.35); }
+  55%  { opacity: 0.6; box-shadow: 0 0 0 12px rgba(209, 72, 80, 0.12); }
+  100% { transform: scale(2.1); opacity: 0; box-shadow: 0 0 0 26px rgba(209, 72, 80, 0); }
+}
+.capture-fx-r {
+  animation: capture-pop-r 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background: radial-gradient(circle, var(--color-danger) 0%, transparent 62%);
+}
+
+/* Queen — the biggest one: flash + shockwave rings + spin, paired with a board shake */
+@keyframes capture-pop-q {
+  0%   { transform: scale(0.3) rotate(0deg); opacity: 1; box-shadow: 0 0 0 0 rgba(209, 72, 80, 0.55), 0 0 0 0 rgba(209, 72, 80, 0.3); }
+  35%  { opacity: 0.9; }
+  100% { transform: scale(2.9) rotate(240deg); opacity: 0; box-shadow: 0 0 0 32px rgba(209, 72, 80, 0), 0 0 0 50px rgba(209, 72, 80, 0); }
+}
+.capture-fx-q {
+  animation: capture-pop-q 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  background: radial-gradient(circle, #fff 0%, var(--color-danger) 38%, transparent 70%);
+}
+
+@keyframes board-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20%      { transform: translate(-5px, 3px); }
+  40%      { transform: translate(5px, -3px); }
+  60%      { transform: translate(-4px, -2px); }
+  80%      { transform: translate(4px, 2px); }
+}
+.board-shake {
+  animation: board-shake 0.42s ease-in-out;
+}
+
+/* ============================================================
+   Chess board skins — two selectable table looks, independent of
+   the app's own dark/light theme toggle. See ChessGame.tsx for
+   the switcher button (persisted in localStorage as chess-board-skin).
+   ============================================================ */
+
+/* Wood — warm tan/brown table, the default */
+.chess-board.skin-wood {
+  --board-light: #E9D1AC;
+  --board-dark: #9A6B3F;
+  --board-border: #7A4F2B;
+  --board-piece-white: #FBF4E6;
+  --board-piece-black: #2E2115;
+  /* Outline drawn around every piece glyph (see ChessGame.tsx) so it never
+     blends into a same-toned square. Subtle here since wood squares already
+     contrast well with ivory/near-black pieces. */
+  --board-piece-white-outline: rgba(46, 33, 21, 0.45);
+  --board-piece-black-outline: rgba(46, 33, 21, 0.25);
+  --board-highlight: rgba(255, 214, 79, 0.55);
+  /* Accent-tinted so the legal-move dot reads clearly against either square shade. */
+  --board-target-dot: rgba(30, 147, 112, 0.75);
+}
+
+/* Black & white — high-contrast classic look */
+.chess-board.skin-bw {
+  --board-light: #FBFBFB;
+  --board-dark: #1B1B1B;
+  --board-border: #1B1B1B;
+  --board-piece-white: #FBFBFB;
+  --board-piece-black: #1B1B1B;
+  /* Piece color intentionally matches its "own" square color one-to-one in
+     this skin (a true white piece, a true black piece) — so the piece MUST
+     get a solid outline in the opposite color, or it disappears completely
+     on the square that shares its tone (e.g. a white piece on a white square). */
+  --board-piece-white-outline: #000000;
+  --board-piece-black-outline: #FFFFFF;
+  --board-highlight: rgba(255, 214, 79, 0.55);
+  --board-target-dot: rgba(30, 147, 112, 0.85);
+}
+.chess-board.skin-bw button {
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+/* King in check: it jumps up off its square, lands, then keeps shivering —
+   paired with playKingTrembleSound()'s rapid chattering-teeth click burst. */
+@keyframes king-tremble {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  8%   { transform: translate(-3px, -11px) rotate(-9deg); }
+  16%  { transform: translate(3px, -15px) rotate(9deg); }
+  24%  { transform: translate(-4px, -9px) rotate(-11deg); }
+  32%  { transform: translate(4px, -3px) rotate(11deg); }
+  40%  { transform: translate(-4px, -7px) rotate(-8deg); }
+  48%  { transform: translate(4px, 0) rotate(8deg); }
+  56%  { transform: translate(-3px, -3px) rotate(-6deg); }
+  64%  { transform: translate(3px, 0) rotate(6deg); }
+  72%  { transform: translate(-2px, -1px) rotate(-4deg); }
+  80%  { transform: translate(2px, 0) rotate(4deg); }
+  88%  { transform: translate(-1px, 0) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.king-tremble {
+  animation: king-tremble 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  transform-origin: 50% 90%;
+}
+
+/* ============================================================
+   Realistic wood-table domino board + ivory pip tiles.
+   ============================================================ */
+/* ============================================================
+   Domino table — a casino-style stage: dark backdrop, a green
+   felt "stadium" (straight top/bottom, rounded ends) wrapped in
+   a wood rim, with the boneyard and reactions floating right on
+   the rim edge like a real table's rail-mounted trays.
+   ============================================================ */
+/* ============================================================
+   Classic flat felt table — plain green, no wood rim or dark
+   casino backdrop. Simple, tidy, matches a real domino app.
+   ============================================================ */
+.domino-stage {
+  position: relative;
+  background: transparent;
+  padding: clamp(20px, 6vw, 30px) 0 0;
+  width: 100%;
+}
+
+.domino-oval {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 0%, #3c9463 0%, #2f7a4f 55%, #276841 100%);
+  border-radius: clamp(12px, 3vw, 18px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 2px 10px rgba(0,0,0,0.2);
+  min-height: clamp(110px, 26vw, 150px);
+  padding: clamp(12px, 4vw, 22px) clamp(16px, 5vw, 28px);
+}
+
+/* While a tile is being dragged and can legally land somewhere, the whole
+   felt glows so it's obvious the board itself is the drop target — no need
+   to hit a thin strip precisely. */
+.domino-oval.is-drag-active {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 2px 10px rgba(0,0,0,0.2),
+    inset 0 0 0 3px var(--color-accent),
+    0 0 18px 2px var(--color-accent-soft);
+  transition: box-shadow 0.15s ease;
+}
+
+/* Player badge sitting right on the rim, half in/half out of the felt,
+   the way real online-table avatars are mounted on the rail. */
+.domino-rail-badge {
+  position: relative;
+  z-index: 2;
+  margin: -18px 0;
+}
+
+/* Boneyard tray floating on the left edge of the rail. */
+.domino-boneyard-rail {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+/* Reaction picker anchored to the table's own corner instead of the
+   whole viewport, so it reads as part of the table rather than a
+   floating page-level widget. */
+.domino-reactions-corner {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+}
+
+.wood-table {
+  position: relative;
+  background-color: #8a5a2e;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 96px),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 5px),
+    linear-gradient(180deg, #a06b36 0%, #8a5a2e 45%, #6f461f 100%);
+  /* Layered inset shadows fake a routed wooden rail around the edge, on top
+     of the existing center vignette, so the surface reads as a tray with a
+     lip rather than a flat rectangle of brown. */
+  box-shadow:
+    inset 0 0 50px rgba(0,0,0,0.4),
+    inset 0 2px 0 rgba(255,255,255,0.06),
+    inset 0 0 0 2px rgba(0,0,0,0.25),
+    inset 0 0 0 5px rgba(255,214,158,0.08);
+  border-radius: 14px;
+}
+
+.domino-tile {
+  --pip-color: #2E3B27;
+  background: linear-gradient(160deg, #FBF8EE 0%, #EFEADA 100%);
+  border-radius: 6px;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  touch-action: none;
+}
+.domino-tile:not(:disabled):hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 10px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.15);
+}
+.domino-tile:not(:disabled):active {
+  transform: translateY(-1px);
+}
+.domino-tile.is-draggable:not(:disabled) {
+  cursor: grab;
+}
+/* The tile left behind in the hand while its drag-ghost follows the
+   pointer — dimmed instead of hidden, so the hand doesn't visibly
+   reflow and jump the moment a drag starts. */
+.domino-tile.is-dragging-source {
+  opacity: 0.32;
+}
+/* Floating clone that tracks the pointer during a drag. Fixed-position,
+   ignores its own pointer events so it never steals the drop target. */
+.domino-tile-ghost {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.08) rotate(-3deg);
+  box-shadow: 0 14px 22px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.15);
+}
+.domino-tile .domino-divider {
+  background: rgba(0,0,0,0.18);
+}
+.domino-half {
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07);
+  border-radius: 3px;
+}
+.domino-pip {
+  border-radius: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* Pop-in for a tile the instant it lands on the chain — plays alongside
+   playDominoPlaceSound() in DominoesGame.tsx. */
+@keyframes domino-place {
+  0%   { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+  55%  { transform: scale(1.12) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.domino-place-anim {
+  animation: domino-place 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Gentle glow pulse on the avatar of whoever's turn it is right now. */
+@keyframes avatar-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--color-accent), 0 0 10px 2px var(--color-accent-soft); }
+  50%      { box-shadow: 0 0 0 3px var(--color-accent), 0 0 18px 6px var(--color-accent-soft); }
+}
+.avatar-pulse {
+  animation: avatar-pulse 1.6s ease-in-out infinite;
+}
+
+/* Falling confetti piece for the win screen — starts just above the
+   viewport, drifts sideways by --confetti-drift while spinning, and fades
+   out near the bottom. Each piece sets its own timing/color inline. */
+@keyframes confetti-fall {
+  0%   { transform: translate(0, -10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--confetti-drift, 0px), 110vh) rotate(var(--confetti-rotate, 180deg)); opacity: 0.9; }
+}
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  border-radius: 1px;
+  animation: confetti-fall linear forwards;
+}
+
+/* ============================================================
+   Playing cards — styled to look like an actual physical deck:
+   corner rank/suit indices, a real pip layout in the center for
+   number cards, a badge for face cards, and a woven card-back
+   pattern. Used by Bassra, Koshina, and War.
+   ============================================================ */
+.playing-card {
+  position: relative;
+  width: 56px;
+  height: 80px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.12), 0 3px 6px rgba(0,0,0,0.25);
+  animation: card-deal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.playing-card.is-interactive {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.playing-card.is-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 2px rgba(0,0,0,0.10), 0 8px 14px rgba(0,0,0,0.3);
+}
+.playing-card.is-interactive:active {
+  transform: translateY(-1px) scale(0.96);
+}
+.playing-card.is-dim {
+  opacity: 0.5;
+}
+
+.playing-card-face {
+  background: var(--color-paper, #F4EEE1);
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.playing-card-face.is-red { color: #B3434A; }
+.playing-card-face.is-black { color: #1A1610; }
+
+.playing-card-corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-weight: 700;
+}
+.playing-card-corner-rank { font-size: 11px; }
+.playing-card-corner-suit { font-size: 10px; margin-top: 1px; }
+.playing-card-corner-tl { top: 4px; left: 4px; }
+.playing-card-corner-br { bottom: 4px; right: 4px; transform: rotate(180deg); }
+
+.playing-card-pips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width: 62%;
+  height: 76%;
+  place-items: center;
+}
+.playing-card-pip {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.playing-card-ace {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.playing-card-court {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 30px;
+  height: 46px;
+  border: 1.5px solid currentColor;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.03);
+}
+.playing-card-court-rank { font-size: 18px; font-weight: 700; line-height: 1; }
+.playing-card-court-suit { font-size: 12px; line-height: 1; }
+
+.playing-card-back {
+  background: #2E4B6B;
+  border: 1px solid rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+.playing-card.is-interactive.playing-card-back:hover {
+  transform: none;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.12), 0 3px 6px rgba(0,0,0,0.25);
+}
+.playing-card-back-pattern {
+  width: 78%;
+  height: 88%;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.10) 0, rgba(255,255,255,0.10) 2px, transparent 2px, transparent 8px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 2px, transparent 2px, transparent 8px);
+}
+
+/* Pop-in when a card is dealt or lands on the table — every CardFace plays
+   this once on mount, so captures/deals visibly "land" instead of just
+   appearing flat. */
+@keyframes card-deal {
+  0%   { transform: scale(0.4) rotate(-6deg); opacity: 0; }
+  60%  { transform: scale(1.08) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ============================================================
+   Koshina free-play card table — a calm green felt surface,
+   fixed regardless of the app's own light/dark theme (same
+   pattern as .wood-table for dominoes).
+   ============================================================ */
+.card-table {
+  position: relative;
+  background-color: #2E6B4F;
+  background-image:
+    radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 70%),
+    linear-gradient(180deg, #35785A 0%, #2E6B4F 55%, #245740 100%);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.06);
+}
+
+/* Domino/table emoji reaction bubble — pops up then fades. */
+@keyframes reaction-pop {
+  0%   { transform: translateY(4px) scale(0.5); opacity: 0; }
+  20%  { transform: translateY(-6px) scale(1.25); opacity: 1; }
+  35%  { transform: translateY(-4px) scale(1); opacity: 1; }
+  80%  { transform: translateY(-4px) scale(1); opacity: 1; }
+  100% { transform: translateY(-10px) scale(0.9); opacity: 0; }
+}
+.reaction-pop {
+  animation: reaction-pop 2.2s ease-in-out forwards;
+  display: inline-block;
+}
