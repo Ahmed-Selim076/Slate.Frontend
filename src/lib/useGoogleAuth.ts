@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 declare global {
   interface Window {
@@ -7,15 +7,22 @@ declare global {
 }
 
 export function useGoogleAuth(onCredential: (idToken: string) => void) {
-  const hiddenButtonRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const initialized = useRef(false)
+  const [width, setWidth] = useState(384)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.offsetWidth)
+    }
+  }, [])
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     if (!clientId) return
 
     const setup = () => {
-      if (initialized.current || !window.google || !hiddenButtonRef.current) return
+      if (initialized.current || !window.google || !containerRef.current) return
       initialized.current = true
 
       window.google.accounts.id.initialize({
@@ -23,10 +30,11 @@ export function useGoogleAuth(onCredential: (idToken: string) => void) {
         callback: (response: { credential: string }) => onCredential(response.credential),
       })
 
-      window.google.accounts.id.renderButton(hiddenButtonRef.current, {
+      window.google.accounts.id.renderButton(containerRef.current, {
         type: 'standard',
         theme: 'outline',
         size: 'large',
+        width,
       })
     }
 
@@ -41,12 +49,7 @@ export function useGoogleAuth(onCredential: (idToken: string) => void) {
       }, 100)
       return () => clearInterval(interval)
     }
-  }, [onCredential])
+  }, [onCredential, width])
 
-  const triggerGoogleSignIn = () => {
-    const realButton = hiddenButtonRef.current?.querySelector('div[role="button"]') as HTMLElement | null
-    realButton?.click()
-  }
-
-  return { hiddenButtonRef, triggerGoogleSignIn }
+  return { containerRef }
 }
