@@ -92,6 +92,16 @@ export async function login(email: string, password: string): Promise<AuthUser> 
   return user
 }
 
+export async function googleLogin(idToken: string): Promise<AuthUser> {
+  const data = await apiFetch<AuthResponse>('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  })
+  const user = { userId: data.userId, email: data.email, displayName: data.displayName }
+  storeSession(data.token, user)
+  return user
+}
+
 export function logout() {
   clearSession()
 }
