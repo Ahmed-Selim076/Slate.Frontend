@@ -1,7 +1,8 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import AuthSidePanel from '../components/AuthSidePanel'
-import { register, ApiError } from '../lib/api'
+import { register, googleLogin, ApiError } from '../lib/api'
+import { useGoogleAuth } from '../lib/useGoogleAuth'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -25,10 +26,20 @@ export default function Register() {
     }
   }
 
-  const handleGoogle = () => {
-    // TODO: wire to GET /api/auth/google once backend supports it
-    console.log('google register')
+  const handleGoogleCredential = async (idToken: string) => {
+    setError(null)
+    setLoading(true)
+    try {
+      await googleLogin(idToken)
+      navigate({ to: '/dashboard' })
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const { hiddenButtonRef, triggerGoogleSignIn } = useGoogleAuth(handleGoogleCredential)
 
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-[var(--color-bg)]">
@@ -48,8 +59,10 @@ export default function Register() {
             Start creating boards and inviting collaborators.
           </p>
 
+          <div ref={hiddenButtonRef} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} />
+
           <button
-            onClick={handleGoogle}
+            onClick={triggerGoogleSignIn}
             className="btn-secondary w-full flex items-center justify-center gap-2 fade-up d1"
           >
             <svg width="16" height="16" viewBox="0 0 48 48">
