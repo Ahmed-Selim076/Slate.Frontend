@@ -9,6 +9,7 @@ export interface AuthUser {
   userId: string
   email: string
   displayName: string
+  avatarUrl: string | null
 }
 
 export function getToken(): string | null {
@@ -70,6 +71,7 @@ interface AuthResponse {
   userId: string
   email: string
   displayName: string
+  avatarUrl: string | null
 }
 
 export async function register(email: string, password: string, displayName: string): Promise<AuthUser> {
@@ -77,7 +79,7 @@ export async function register(email: string, password: string, displayName: str
     method: 'POST',
     body: JSON.stringify({ email, password, displayName }),
   })
-  const user = { userId: data.userId, email: data.email, displayName: data.displayName }
+  const user = { userId: data.userId, email: data.email, displayName: data.displayName, avatarUrl: data.avatarUrl }
   storeSession(data.token, user)
   return user
 }
@@ -87,7 +89,7 @@ export async function login(email: string, password: string): Promise<AuthUser> 
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
-  const user = { userId: data.userId, email: data.email, displayName: data.displayName }
+  const user = { userId: data.userId, email: data.email, displayName: data.displayName, avatarUrl: data.avatarUrl }
   storeSession(data.token, user)
   return user
 }
@@ -97,7 +99,7 @@ export async function googleLogin(idToken: string): Promise<AuthUser> {
     method: 'POST',
     body: JSON.stringify({ idToken }),
   })
-  const user = { userId: data.userId, email: data.email, displayName: data.displayName }
+  const user = { userId: data.userId, email: data.email, displayName: data.displayName, avatarUrl: data.avatarUrl }
   storeSession(data.token, user)
   return user
 }
@@ -110,6 +112,7 @@ export interface Profile {
   userId: string
   email: string
   displayName: string
+  avatarUrl: string | null
 }
 
 export async function getProfile(): Promise<Profile> {
@@ -125,6 +128,29 @@ export async function updateProfile(displayName: string): Promise<Profile> {
   const current = getStoredUser()
   if (current) {
     localStorage.setItem(USER_KEY, JSON.stringify({ ...current, displayName: profile.displayName }))
+  }
+  return profile
+}
+
+// avatarDataUrl must be a "data:image/...;base64,..." string — resize/compress
+// client-side (see toAvatarDataUrl in Settings.tsx) before calling this.
+export async function updateAvatar(avatarDataUrl: string): Promise<Profile> {
+  const profile = await apiFetch<Profile>('/auth/me/avatar', {
+    method: 'PUT',
+    body: JSON.stringify({ avatarDataUrl }),
+  })
+  const current = getStoredUser()
+  if (current) {
+    localStorage.setItem(USER_KEY, JSON.stringify({ ...current, avatarUrl: profile.avatarUrl }))
+  }
+  return profile
+}
+
+export async function deleteAvatar(): Promise<Profile> {
+  const profile = await apiFetch<Profile>('/auth/me/avatar', { method: 'DELETE' })
+  const current = getStoredUser()
+  if (current) {
+    localStorage.setItem(USER_KEY, JSON.stringify({ ...current, avatarUrl: null }))
   }
   return profile
 }
