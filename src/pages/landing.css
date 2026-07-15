@@ -17,6 +17,7 @@
   --ld-accent-ink: #2A1204;
   --ld-accent-2: #FFD23F;
   --ld-accent-3: #7DE0C7;
+  --ld-danger: #FF6B6B;
 
   --ld-font-display: 'Space Grotesk', 'Inter', sans-serif;
   --ld-font-body: 'Inter', sans-serif;
@@ -272,6 +273,66 @@
 .ld-titleblock-cell {
   border-left: 1px solid var(--ld-line);
   padding-left: 1rem;
+}
+
+/* ---------- form controls (dashboard / settings) ---------- */
+.ld-label {
+  display: block;
+  font-family: var(--ld-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ld-paper-dim);
+  margin-bottom: 6px;
+}
+.ld-input {
+  width: 100%;
+  background: var(--ld-bg-deep);
+  border: 1px solid var(--ld-line);
+  border-radius: 3px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.875rem;
+  color: var(--ld-paper);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.ld-input::placeholder { color: var(--ld-paper-dim); opacity: 0.7; }
+.ld-input:disabled { opacity: 0.5; }
+.ld-input:focus { border-color: var(--ld-accent-3); }
+
+.ld-btn-danger-text {
+  font-family: var(--ld-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: var(--ld-danger);
+  transition: opacity 0.15s ease;
+}
+.ld-btn-danger-text:hover { opacity: 0.75; }
+.ld-btn-danger-text:disabled { opacity: 0.4; }
+
+.ld-panel-title {
+  font-family: var(--ld-font-display);
+  font-weight: 600;
+  color: var(--ld-paper);
+}
+
+/* Avatar circle used in the nav trigger + settings preview. Falls back to
+   an initial-letter badge when there's no uploaded photo. */
+.ld-avatar {
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--ld-accent);
+  color: var(--ld-accent-ink);
+  font-weight: 600;
+}
+.ld-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ---------- motion ---------- */
