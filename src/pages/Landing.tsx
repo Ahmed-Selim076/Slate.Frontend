@@ -281,10 +281,9 @@ export default function Landing() {
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="w-8 h-8 flex items-center justify-center text-sm font-semibold"
-                style={{ background: 'var(--ld-accent)', color: 'var(--ld-accent-ink)', borderRadius: 3 }}
+                className="ld-avatar w-8 h-8 text-sm"
               >
-                {user.displayName?.[0]?.toUpperCase() ?? '?'}
+                {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : (user.displayName?.[0]?.toUpperCase() ?? '?')}
               </button>
               {menuOpen && (
                 <div
