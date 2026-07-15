@@ -1,6 +1,8 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { Plus, Crown, Grid3x3, Spade, Trash2, Link2, Check } from 'lucide-react'
 import { listBoards, createBoard, deleteBoard, createChessGame, createCardGame, getStoredUser, logout, ApiError, type BoardSummary } from '../lib/api'
+import './landing.css'
 
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -141,33 +143,41 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-border)]">
-        <Link to="/" className="text-lg font-semibold">Slate</Link>
+    <div className="ld-page min-h-screen">
+      <nav className="ld-nav flex items-center justify-between px-8 py-4">
+        <Link to="/" className="ld-wordmark text-lg" style={{ color: 'var(--ld-paper)' }}>
+          <span className="ld-wordmark-mark" />
+          SLATE
+        </Link>
         <div ref={menuRef} className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
             title="Account"
-            className="w-8 h-8 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[#082A20] text-sm font-semibold"
+            className="ld-avatar w-8 h-8 text-sm"
           >
-            {user?.displayName?.[0]?.toUpperCase() ?? '?'}
+            {user?.avatarUrl ? <img src={user.avatarUrl} alt="" /> : (user?.displayName?.[0]?.toUpperCase() ?? '?')}
           </button>
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-56 panel py-2 z-30">
-              <div className="px-4 py-2 border-b border-[var(--color-border)]">
-                <p className="text-sm font-medium truncate">{user?.displayName}</p>
-                <p className="text-xs text-[var(--color-text-dim)] truncate">{user?.email}</p>
+            <div
+              className="absolute right-0 mt-2 w-56 py-2 z-30"
+              style={{ background: 'var(--ld-bg-raised)', border: '1px solid var(--ld-line)', borderRadius: 4 }}
+            >
+              <div className="px-4 py-2" style={{ borderBottom: '1px solid var(--ld-line)' }}>
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--ld-paper)' }}>{user?.displayName}</p>
+                <p className="text-xs truncate ld-mono" style={{ color: 'var(--ld-paper-dim)' }}>{user?.email}</p>
               </div>
               <Link
                 to="/settings"
                 onClick={() => setMenuOpen(false)}
-                className="block w-full text-left px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-elevated)]"
+                className="block w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                style={{ color: 'var(--ld-paper)' }}
               >
                 Profile settings
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-surface-elevated)]"
+                className="w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                style={{ color: '#FF8A6E' }}
               >
                 Sign out
               </button>
@@ -177,22 +187,23 @@ export default function Dashboard() {
       </nav>
 
       <main className="max-w-5xl mx-auto px-8 py-12">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-semibold">Your boards</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-3xl font-semibold" style={{ color: 'var(--ld-paper)' }}>Your boards</h1>
         </div>
+        <p className="ld-tag mb-6">[ SHEET INDEX ]</p>
 
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <button onClick={handleCreate} disabled={creating} className="btn-primary disabled:opacity-60">
-            {creating ? 'Creating…' : '+ New board'}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <button onClick={handleCreate} disabled={creating} className="ld-btn-primary disabled:opacity-60">
+            {creating ? 'Creating…' : 'New board'} <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
           </button>
-          <button onClick={handleNewChessGame} disabled={creatingChess} className="btn-secondary disabled:opacity-60">
-            {creatingChess ? 'Starting…' : '♞ Chess'}
+          <button onClick={handleNewChessGame} disabled={creatingChess} className="ld-btn-secondary disabled:opacity-60">
+            <Crown className="w-3.5 h-3.5" strokeWidth={2} /> {creatingChess ? 'Starting…' : 'Chess'}
           </button>
-          <button onClick={() => handleNewCardGame('Dominoes')} disabled={creatingCardGame === 'Dominoes'} className="btn-secondary disabled:opacity-60">
-            {creatingCardGame === 'Dominoes' ? 'Starting…' : '🁣 Dominoes'}
+          <button onClick={() => handleNewCardGame('Dominoes')} disabled={creatingCardGame === 'Dominoes'} className="ld-btn-secondary disabled:opacity-60">
+            <Grid3x3 className="w-3.5 h-3.5" strokeWidth={2} /> {creatingCardGame === 'Dominoes' ? 'Starting…' : 'Dominoes'}
           </button>
-          <button onClick={() => handleNewCardGame('Koshina')} disabled={creatingCardGame === 'Koshina'} className="btn-secondary disabled:opacity-60">
-            {creatingCardGame === 'Koshina' ? 'Starting…' : '🃏 كوتشينة'}
+          <button onClick={() => handleNewCardGame('Koshina')} disabled={creatingCardGame === 'Koshina'} className="ld-btn-secondary disabled:opacity-60">
+            <Spade className="w-3.5 h-3.5" strokeWidth={2} /> {creatingCardGame === 'Koshina' ? 'Starting…' : 'كوتشينة'}
           </button>
         </div>
 
@@ -201,24 +212,24 @@ export default function Dashboard() {
             value={joinInput}
             onChange={(e) => setJoinInput(e.target.value)}
             placeholder="Paste a board link or ID to join…"
-            className="flex-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+            className="ld-input flex-1"
           />
-          <button type="submit" className="btn-secondary text-sm px-4">
+          <button type="submit" className="ld-btn-secondary text-sm px-4">
             Join
           </button>
         </form>
-        {joinError && <p className="text-[var(--color-danger)] text-sm -mt-6 mb-6">{joinError}</p>}
+        {joinError && <p style={{ color: 'var(--ld-danger)' }} className="text-sm -mt-6 mb-6">{joinError}</p>}
 
         {error && (
-          <div className="panel p-4 mb-6 border-[var(--color-danger)] text-[var(--color-danger)] text-sm">
+          <div className="ld-card p-4 mb-6 text-sm" style={{ borderColor: 'var(--ld-danger)', color: 'var(--ld-danger)' }}>
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="panel p-12 text-center text-[var(--color-text-dim)]">Loading…</div>
+          <div className="ld-card p-12 text-center" style={{ color: 'var(--ld-paper-dim)' }}>Loading…</div>
         ) : boards.length === 0 ? (
-          <div className="panel p-12 text-center text-[var(--color-text-dim)]">
+          <div className="ld-card p-12 text-center" style={{ color: 'var(--ld-paper-dim)' }}>
             No boards yet — create your first one to get started.
           </div>
         ) : (
@@ -228,25 +239,34 @@ export default function Dashboard() {
                 key={b.id}
                 to="/board/$boardId"
                 params={{ boardId: b.id }}
-                className="panel p-5 block group hover:border-[var(--color-border-hover)] transition-colors relative"
+                className="ld-card p-5 block group relative"
               >
                 <button
                   onClick={(e) => handleDelete(e, b.id, b.title)}
                   title="Delete board"
-                  className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-dim)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-danger)] hover:bg-[var(--color-surface-elevated)] transition-all"
+                  className="absolute top-3 right-3 w-7 h-7 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                  style={{ color: 'var(--ld-paper-dim)' }}
                 >
-                  🗑
+                  <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
                 <button
                   onClick={(e) => handleCopyLink(e, b.id)}
                   title="Copy board link"
-                  className="absolute top-3 right-12 w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-dim)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] hover:bg-[var(--color-surface-elevated)] transition-all text-xs"
+                  className="absolute top-3 right-12 w-7 h-7 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                  style={{ color: copiedId === b.id ? 'var(--ld-accent-3)' : 'var(--ld-paper-dim)' }}
                 >
-                  {copiedId === b.id ? '✓' : '🔗'}
+                  {copiedId === b.id ? <Check className="w-3.5 h-3.5" strokeWidth={2} /> : <Link2 className="w-3.5 h-3.5" strokeWidth={2} />}
                 </button>
-                <div className="h-28 rounded-lg mb-4 dot-grid-bg bg-[var(--color-surface-elevated)]" />
-                <h3 className="font-semibold text-sm">{b.title}</h3>
-                <p className="text-xs text-[var(--color-text-dim)] mt-1">
+                <div
+                  className="h-28 rounded mb-4"
+                  style={{
+                    background: 'var(--ld-bg-deep)',
+                    backgroundImage: 'linear-gradient(var(--ld-line) 1px, transparent 1px), linear-gradient(90deg, var(--ld-line) 1px, transparent 1px)',
+                    backgroundSize: '16px 16px',
+                  }}
+                />
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--ld-paper)' }}>{b.title}</h3>
+                <p className="ld-mono text-xs mt-1" style={{ color: 'var(--ld-paper-dim)' }}>
                   Active {timeAgo(b.lastActiveAt)}
                 </p>
               </Link>
