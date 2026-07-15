@@ -2,19 +2,12 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import {
   MousePointer2, Maximize, Download, Crown, Grid3x3, Spade,
-  ChevronDown,
+  ChevronDown, ArrowRight, Plus,
 } from 'lucide-react'
 import { getStoredUser, logout } from '../lib/api'
+import './landing.css'
 
-// Reads a resolved CSS custom property off <html>, so canvas drawing (which
-// can't use var(...) directly) still follows the light/dark theme toggle.
-function cssVar(name: string, fallback: string) {
-  if (typeof window === 'undefined') return fallback
-  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-  return v || fallback
-}
-
-function AmbientCanvas() {
+function BlueprintCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -27,17 +20,16 @@ function AmbientCanvas() {
     const resize = () => {
       canvas.width = canvas.clientWidth * dpr
       canvas.height = canvas.clientHeight * dpr
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.scale(dpr, dpr)
     }
     resize()
 
-    const accent = cssVar('--color-accent', '#1E9370')
-    const accent2 = cssVar('--color-accent-2', '#4A63D6')
-    const dotColor = cssVar('--color-border-hover', 'rgba(28,27,24,0.15)')
-
+    const gridColor = 'rgba(140, 179, 219, 0.16)'
+    const strokeColor = '#EDF4FC'
     const cursors = [
-      { x: 70, y: 90, vx: 0.22, vy: 0.14, color: accent, name: 'Sara' },
-      { x: 260, y: 200, vx: -0.16, vy: 0.2, color: accent2, name: 'Omar' },
+      { x: 70, y: 90, vx: 0.22, vy: 0.14, color: '#FF6B35', name: 'Sara' },
+      { x: 260, y: 200, vx: -0.16, vy: 0.2, color: '#7DE0C7', name: 'Omar' },
     ]
 
     let t = 0
@@ -52,18 +44,27 @@ function AmbientCanvas() {
       const h = canvas.clientHeight
       ctx.clearRect(0, 0, w, h)
 
-      ctx.fillStyle = dotColor
-      for (let x = 0; x < w; x += 24) {
-        for (let y = 0; y < h; y += 24) {
-          ctx.fillRect(x, y, 1, 1)
-        }
+      ctx.strokeStyle = gridColor
+      ctx.lineWidth = 1
+      for (let x = 0; x < w; x += 28) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+      }
+      for (let y = 0; y < h; y += 28) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(w, y)
+        ctx.stroke()
       }
 
       const progress = Math.floor((t / 4) % (strokePath.length + 40))
-      ctx.strokeStyle = accent
-      ctx.lineWidth = 2.5
+      ctx.strokeStyle = strokeColor
+      ctx.lineWidth = 2
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
+      ctx.setLineDash([1, 0])
       ctx.beginPath()
       strokePath.slice(0, Math.min(progress, strokePath.length)).forEach(([x, y], i) => {
         if (i === 0) ctx.moveTo(x, y)
@@ -82,14 +83,14 @@ function AmbientCanvas() {
         ctx.arc(c.x, c.y, 4, 0, Math.PI * 2)
         ctx.fill()
 
-        ctx.font = '500 11px Inter, sans-serif'
+        ctx.font = '500 11px "IBM Plex Mono", monospace'
         const textW = ctx.measureText(c.name).width
         ctx.beginPath()
-        if (ctx.roundRect) ctx.roundRect(c.x + 10, c.y - 8, textW + 12, 18, 9)
+        if (ctx.roundRect) ctx.roundRect(c.x + 10, c.y - 8, textW + 12, 18, 2)
         else ctx.rect(c.x + 10, c.y - 8, textW + 12, 18)
         ctx.fillStyle = c.color
         ctx.fill()
-        ctx.fillStyle = '#FFFFFF'
+        ctx.fillStyle = '#0A2039'
         ctx.fillText(c.name, c.x + 16, c.y + 4)
       })
 
@@ -101,11 +102,24 @@ function AmbientCanvas() {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-[360px] rounded-xl border border-[var(--color-border)]"
-      style={{ background: 'var(--color-surface)' }}
-    />
+    <div className="relative">
+      <span className="ld-crop ld-crop-tl" />
+      <span className="ld-crop ld-crop-tr" />
+      <span className="ld-crop ld-crop-bl" />
+      <span className="ld-crop ld-crop-br" />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-[360px]"
+        style={{ background: '#0A2039', border: '1px solid var(--ld-line)' }}
+      />
+      <div className="flex items-center justify-between mt-2 px-1">
+        <span className="ld-mono text-[11px]" style={{ color: 'var(--ld-paper-dim)' }}>FIG. 01 — LIVE BOARD</span>
+        <span className="ld-mono text-[11px] flex items-center gap-1.5" style={{ color: 'var(--ld-accent-3)' }}>
+          <span className="w-1.5 h-1.5 rounded-full ld-blink" style={{ background: 'var(--ld-accent-3)' }} />
+          2 EDITING NOW
+        </span>
+      </div>
+    </div>
   )
 }
 
@@ -143,6 +157,14 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   )
 }
 
+function SectionRule({ label }: { label: string }) {
+  return (
+    <div className="ld-rule mx-8">
+      <span className="ld-rule-tag ld-mono">{label}</span>
+    </div>
+  )
+}
+
 function FeatureCard({
   title,
   desc,
@@ -158,19 +180,21 @@ function FeatureCard({
   return (
     <div
       ref={ref}
-      className="panel p-6 transition-all duration-300 hover:border-[var(--color-border-hover)] hover:-translate-y-0.5"
+      className="ld-card p-6"
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? 'translateY(0)' : 'translateY(14px)',
         transitionDelay: `${delay}ms`,
+        transitionProperty: 'opacity, transform, border-color',
+        transitionDuration: '0.6s, 0.6s, 0.25s',
         transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
-      <div className="w-11 h-11 rounded-lg bg-[var(--color-accent-soft)] flex items-center justify-center mb-4 relative overflow-hidden">
+      <div className="ld-icon-ring mb-4">
         {children}
       </div>
-      <h3 className="font-semibold text-base mb-2">{title}</h3>
-      <p className="text-[var(--color-text-dim)] text-sm leading-relaxed">{desc}</p>
+      <h3 className="font-semibold text-base mb-2" style={{ color: 'var(--ld-paper)' }}>{title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--ld-paper-dim)' }}>{desc}</p>
     </div>
   )
 }
@@ -194,18 +218,19 @@ const faqs = [
   { q: 'Is my board saved automatically?', a: 'Yes. Your board is saved continuously as you work, so you can close the tab and pick up right where you left off.' },
 ]
 
-function Faq({ q, a }: { q: string; a: string }) {
+function Faq({ index, q, a }: { index: number; q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="panel overflow-hidden">
+    <div className="ld-faq-row">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+        className="w-full flex items-center gap-4 py-4 text-left"
       >
-        <span className="font-medium text-sm">{q}</span>
+        <span className="ld-faq-index ld-mono">Q{index}</span>
+        <span className="font-medium text-sm flex-1" style={{ color: 'var(--ld-paper)' }}>{q}</span>
         <ChevronDown
-          className="w-4 h-4 shrink-0 text-[var(--color-text-dim)] transition-transform duration-300"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          className="w-4 h-4 shrink-0 transition-transform duration-300"
+          style={{ color: 'var(--ld-paper-dim)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </button>
       <div
@@ -213,7 +238,7 @@ function Faq({ q, a }: { q: string; a: string }) {
         style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">
-          <p className="px-5 pb-4 text-sm text-[var(--color-text-dim)] leading-relaxed">{a}</p>
+          <p className="pb-4 pl-[46px] text-sm leading-relaxed" style={{ color: 'var(--ld-paper-dim)' }}>{a}</p>
         </div>
       </div>
     </div>
@@ -241,45 +266,55 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-body flex flex-col">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-border)] relative z-10">
-        <Link to="/" className="text-lg font-semibold tracking-tight">Slate</Link>
-        <div className="flex items-center gap-7 text-sm text-[var(--color-text-dim)]">
-          <a href="#features" className="nav-link">Features</a>
-          <a href="#games" className="nav-link">Games</a>
-          <a href="#how-it-works" className="nav-link">How it works</a>
-          <a href="#faq" className="nav-link">FAQ</a>
+    <div className="ld-page min-h-screen flex flex-col">
+      <nav className="ld-nav flex items-center justify-between px-8 py-4">
+        <Link to="/" className="ld-wordmark text-lg" style={{ color: 'var(--ld-paper)' }}>
+          <span className="ld-wordmark-mark" />
+          SLATE
+        </Link>
+        <div className="flex items-center gap-7">
+          <a href="#features" className="ld-nav-link">Features</a>
+          <a href="#games" className="ld-nav-link">Games</a>
+          <a href="#how-it-works" className="ld-nav-link">How it works</a>
+          <a href="#faq" className="ld-nav-link">FAQ</a>
           {user ? (
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="w-8 h-8 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[#082A20] text-sm font-semibold"
+                className="w-8 h-8 flex items-center justify-center text-sm font-semibold"
+                style={{ background: 'var(--ld-accent)', color: 'var(--ld-accent-ink)', borderRadius: 3 }}
               >
                 {user.displayName?.[0]?.toUpperCase() ?? '?'}
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-56 panel py-2 z-30">
-                  <div className="px-4 py-2 border-b border-[var(--color-border)]">
-                    <p className="text-sm font-medium truncate">{user.displayName}</p>
-                    <p className="text-xs text-[var(--color-text-dim)] truncate">{user.email}</p>
+                <div
+                  className="absolute right-0 mt-2 w-56 py-2 z-30"
+                  style={{ background: 'var(--ld-bg-raised)', border: '1px solid var(--ld-line)', borderRadius: 4 }}
+                >
+                  <div className="px-4 py-2" style={{ borderBottom: '1px solid var(--ld-line)' }}>
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--ld-paper)' }}>{user.displayName}</p>
+                    <p className="text-xs truncate ld-mono" style={{ color: 'var(--ld-paper-dim)' }}>{user.email}</p>
                   </div>
                   <Link
                     to="/dashboard"
                     onClick={() => setMenuOpen(false)}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-surface-elevated)]"
+                    className="block w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                    style={{ color: 'var(--ld-paper)' }}
                   >
                     Dashboard
                   </Link>
                   <Link
                     to="/settings"
                     onClick={() => setMenuOpen(false)}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-surface-elevated)]"
+                    className="block w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                    style={{ color: 'var(--ld-paper)' }}
                   >
                     Profile settings
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-surface-elevated)]"
+                    className="w-full text-left px-4 py-2 text-sm hover:opacity-80"
+                    style={{ color: '#FF8A6E' }}
                   >
                     Sign out
                   </button>
@@ -288,75 +323,69 @@ export default function Landing() {
             </div>
           ) : (
             <>
-              <Link to="/login" className="nav-link">Sign In</Link>
-              <Link to="/register" className="btn-primary text-sm">
-                Create a board
+              <Link to="/login" className="ld-nav-link">Sign In</Link>
+              <Link to="/register" className="ld-btn-primary">
+                Create a board <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
               </Link>
             </>
           )}
         </div>
       </nav>
 
-      <section className="relative overflow-hidden">
-        <div
-          className="orb-a absolute -left-24 top-10 w-72 h-72 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'var(--color-accent-soft)' }}
-        />
-        <div
-          className="orb-b absolute right-0 top-40 w-80 h-80 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'rgba(74,99,214,0.10)' }}
-        />
+      <section className="relative">
+        <span className="ld-crop ld-crop-tl" />
+        <span className="ld-crop ld-crop-tr" />
         <div className="relative grid md:grid-cols-2 gap-14 items-center px-8 py-28 max-w-6xl mx-auto">
-          <div className="fade-up">
-            <span className="inline-block text-xs font-mono text-[var(--color-accent)] bg-[var(--color-accent-soft)] rounded-full px-3 py-1 mb-6">
-              Real-time collaboration
-            </span>
-            <h1 className="text-5xl md:text-6xl font-semibold leading-[1.1] mb-6 tracking-tight">
+          <div className="ld-fade-up">
+            <span className="ld-tag mb-6">[ REAL-TIME COLLABORATION ]</span>
+            <h1 className="text-5xl md:text-6xl font-semibold leading-[1.08] mt-4 mb-6" style={{ color: 'var(--ld-paper)' }}>
               A clean slate,<br />drawn together.
             </h1>
-            <p className="text-[var(--color-text-dim)] text-lg mb-8 max-w-md">
+            <p className="text-lg mb-8 max-w-md" style={{ color: 'var(--ld-paper-dim)' }}>
               Start a board, share the link, and sketch out your next idea with your team — live.
             </p>
-            <div className="flex items-center gap-4">
-              <Link to="/register" className="btn-primary">
-                Create a board
+            <div className="flex items-center gap-6 flex-wrap">
+              <Link to="/register" className="ld-btn-primary">
+                Create a board <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
               </Link>
-              <a href="#how-it-works" className="btn-secondary">
+              <a href="#how-it-works" className="ld-btn-secondary">
                 See how it works
               </a>
             </div>
           </div>
-          <div className="fade-up" style={{ animationDelay: '0.1s' }}>
-            <AmbientCanvas />
+          <div className="ld-fade-up" style={{ animationDelay: '0.12s' }}>
+            <BlueprintCanvas />
           </div>
         </div>
       </section>
 
-      <section id="features" className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/40">
+      <section id="features">
+        <SectionRule label="§ 01 — FEATURES" />
         <div className="px-8 py-24 max-w-6xl mx-auto w-full">
           <Reveal>
-            <h2 className="text-2xl font-semibold mb-10 text-center">Built for thinking together</h2>
+            <h2 className="text-2xl font-semibold mb-10 text-center" style={{ color: 'var(--ld-paper)' }}>Built for thinking together</h2>
           </Reveal>
           <div className="grid md:grid-cols-3 gap-5">
             <FeatureCard title="Live cursors" desc="See everyone's cursor and name moving in real time, like looking over their shoulder." delay={0}>
-              <MousePointer2 className="w-5 h-5 text-[var(--color-accent)] icon-orbit" strokeWidth={2} />
+              <MousePointer2 className="w-5 h-5" style={{ color: 'var(--ld-accent)' }} strokeWidth={2} />
             </FeatureCard>
             <FeatureCard title="Infinite canvas" desc="Pan and zoom freely — your ideas are never boxed in." delay={100}>
-              <Maximize className="w-5 h-5 text-[var(--color-accent)] icon-pulse" strokeWidth={2} />
+              <Maximize className="w-5 h-5" style={{ color: 'var(--ld-accent-3)' }} strokeWidth={2} />
             </FeatureCard>
             <FeatureCard title="Export anywhere" desc="PNG, PDF, or a clean text list of every sticky note." delay={200}>
-              <Download className="w-5 h-5 text-[var(--color-accent)] icon-bounce" strokeWidth={2} />
+              <Download className="w-5 h-5" style={{ color: 'var(--ld-accent-2)' }} strokeWidth={2} />
             </FeatureCard>
           </div>
         </div>
       </section>
 
-      <section id="games" className="border-t border-[var(--color-border)]">
+      <section id="games">
+        <SectionRule label="§ 02 — GAMES" />
         <div className="px-8 py-24 max-w-6xl mx-auto w-full">
           <Reveal>
             <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold mb-3">Need a break from the whiteboard?</h2>
-              <p className="text-[var(--color-text-dim)] max-w-lg mx-auto">
+              <h2 className="text-2xl font-semibold mb-3" style={{ color: 'var(--ld-paper)' }}>Need a break from the whiteboard?</h2>
+              <p className="max-w-lg mx-auto" style={{ color: 'var(--ld-paper-dim)' }}>
                 Every board comes with a lobby of two-player games — same link-sharing, same live sync.
               </p>
             </div>
@@ -364,12 +393,12 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-5">
             {games.map((g, i) => (
               <Reveal key={g.title} delay={i * 100}>
-                <div className="panel p-6 h-full transition-all duration-300 hover:border-[var(--color-border-hover)] hover:-translate-y-0.5">
-                  <div className="w-11 h-11 rounded-lg bg-[var(--color-accent-soft)] flex items-center justify-center mb-4">
-                    <g.icon className="w-5 h-5 text-[var(--color-accent)]" strokeWidth={2} />
+                <div className="ld-card p-6 h-full">
+                  <div className="ld-icon-ring mb-4">
+                    <g.icon className="w-5 h-5" style={{ color: 'var(--ld-accent)' }} strokeWidth={2} />
                   </div>
-                  <h3 className="font-semibold text-base mb-2">{g.title}</h3>
-                  <p className="text-[var(--color-text-dim)] text-sm leading-relaxed">{g.desc}</p>
+                  <h3 className="font-semibold text-base mb-2" style={{ color: 'var(--ld-paper)' }}>{g.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--ld-paper-dim)' }}>{g.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -377,20 +406,21 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="how-it-works" className="border-t border-[var(--color-border)]">
+      <section id="how-it-works">
+        <SectionRule label="§ 03 — HOW IT WORKS" />
         <div className="px-8 py-24 max-w-6xl mx-auto w-full">
           <Reveal>
-            <h2 className="text-2xl font-semibold mb-12 text-center">How it works</h2>
+            <h2 className="text-2xl font-semibold mb-12 text-center" style={{ color: 'var(--ld-paper)' }}>How it works</h2>
           </Reveal>
           <div className="grid md:grid-cols-3 gap-10">
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 100}>
                 <div className="relative">
-                  <span className="text-4xl font-semibold text-[var(--color-accent)] opacity-30 block mb-3">
+                  <span className="ld-mono text-sm block mb-3" style={{ color: 'var(--ld-accent-3)' }}>
                     {s.n}
                   </span>
-                  <h3 className="font-semibold mb-2">{s.title}</h3>
-                  <p className="text-[var(--color-text-dim)] text-sm leading-relaxed">{s.desc}</p>
+                  <h3 className="font-semibold mb-2" style={{ color: 'var(--ld-paper)' }}>{s.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--ld-paper-dim)' }}>{s.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -398,15 +428,16 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="faq" className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/40">
+      <section id="faq">
+        <SectionRule label="§ 04 — FAQ" />
         <div className="px-8 py-24 max-w-3xl mx-auto w-full">
           <Reveal>
-            <h2 className="text-2xl font-semibold mb-10 text-center">Questions, answered</h2>
+            <h2 className="text-2xl font-semibold mb-10 text-center" style={{ color: 'var(--ld-paper)' }}>Questions, answered</h2>
           </Reveal>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col">
             {faqs.map((f, i) => (
               <Reveal key={f.q} delay={i * 60}>
-                <Faq q={f.q} a={f.a} />
+                <Faq index={i + 1} q={f.q} a={f.a} />
               </Reveal>
             ))}
           </div>
@@ -414,23 +445,38 @@ export default function Landing() {
       </section>
 
       <Reveal>
-        <section className="mx-8 mb-24 mt-8 max-w-6xl md:mx-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-14 text-center">
-          <h2 className="text-3xl font-semibold mb-6">Ready to start a board?</h2>
-          <Link to="/register" className="btn-primary inline-block">
-            Start for free
+        <section
+          className="relative mx-8 mb-24 mt-8 max-w-6xl md:mx-auto p-14 text-center overflow-hidden"
+          style={{ background: 'var(--ld-bg-raised)', border: '1px solid var(--ld-line)', borderRadius: 6 }}
+        >
+          <span className="ld-crop ld-crop-tl" />
+          <span className="ld-crop ld-crop-br" />
+          <div className="ld-stamp hidden md:flex" style={{ top: 20, right: 40 }}>
+            SLATE<br />LIVE SYNC
+          </div>
+          <h2 className="text-3xl font-semibold mb-6" style={{ color: 'var(--ld-paper)' }}>Ready to start a board?</h2>
+          <Link to="/register" className="ld-btn-primary inline-flex">
+            Start for free <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
           </Link>
         </section>
       </Reveal>
 
-      <footer className="border-t border-[var(--color-border)] px-8 py-8 mt-auto">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-sm font-semibold">Slate</span>
-          <div className="flex items-center gap-6 text-sm text-[var(--color-text-dim)]">
-            <a href="#features" className="hover:text-[var(--color-text)] transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-[var(--color-text)] transition-colors">How it works</a>
-            <Link to="/login" className="hover:text-[var(--color-text)] transition-colors">Sign in</Link>
+      <footer className="ld-titleblock mt-auto">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-stretch gap-4 md:gap-0 px-8 py-6">
+          <div className="ld-wordmark text-sm pr-6" style={{ color: 'var(--ld-paper)' }}>
+            <span className="ld-wordmark-mark" style={{ width: 7, height: 7 }} />
+            SLATE
           </div>
-          <span className="text-xs text-[var(--color-text-dim)]">© 2026 Slate</span>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-2 flex-1 md:pl-6" style={{ borderLeft: '1px solid var(--ld-line)' }}>
+            <span className="ld-titleblock-cell" style={{ borderLeft: 'none' }}>DRAWN — SLATE TEAM</span>
+            <span className="ld-titleblock-cell">SCALE — 1:1</span>
+            <span className="ld-titleblock-cell">REV — 2026.07</span>
+          </div>
+          <div className="flex items-center gap-6 md:pl-6" style={{ borderLeft: '1px solid var(--ld-line)' }}>
+            <a href="#features" className="ld-nav-link">Features</a>
+            <a href="#how-it-works" className="ld-nav-link">How it works</a>
+            <Link to="/login" className="ld-nav-link">Sign in</Link>
+          </div>
         </div>
       </footer>
     </div>
