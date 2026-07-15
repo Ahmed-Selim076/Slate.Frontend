@@ -1,0 +1,296 @@
+/* ============================================================
+   Landing page — "Blueprint" theme.
+   Scoped entirely under .ld-page so the rest of the app
+   (dashboard, games, auth) keeps using the default theme in
+   src/index.css untouched.
+   ============================================================ */
+
+.ld-page {
+  --ld-bg: #0E2A4D;
+  --ld-bg-deep: #0A2039;
+  --ld-bg-raised: #123258;
+  --ld-line: rgba(140, 179, 219, 0.22);
+  --ld-line-strong: rgba(140, 179, 219, 0.5);
+  --ld-paper: #EDF4FC;
+  --ld-paper-dim: #93AECD;
+  --ld-accent: #FF6B35;
+  --ld-accent-ink: #2A1204;
+  --ld-accent-2: #FFD23F;
+  --ld-accent-3: #7DE0C7;
+
+  --ld-font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --ld-font-body: 'Inter', sans-serif;
+  --ld-font-mono: 'IBM Plex Mono', monospace;
+
+  position: relative;
+  background: var(--ld-bg);
+  color: var(--ld-paper);
+  font-family: var(--ld-font-body);
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+.ld-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--ld-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ld-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(180deg, black, black 60%, transparent 100%);
+}
+
+.ld-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ld-page h1, .ld-page h2, .ld-page h3 {
+  font-family: var(--ld-font-display);
+  letter-spacing: -0.01em;
+}
+
+.ld-mono {
+  font-family: var(--ld-font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- corner crop marks (blueprint sheet registration) ---------- */
+.ld-crop {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--ld-line-strong);
+  pointer-events: none;
+  z-index: 2;
+}
+.ld-crop-tl { top: 14px; left: 14px; border-top: 1.5px solid; border-left: 1.5px solid; }
+.ld-crop-tr { top: 14px; right: 14px; border-top: 1.5px solid; border-right: 1.5px solid; }
+.ld-crop-bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+.ld-crop-br { bottom: 14px; right: 14px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+/* ---------- nav ---------- */
+.ld-nav {
+  background: var(--ld-bg-deep);
+  border-bottom: 1px solid var(--ld-line);
+}
+.ld-wordmark {
+  font-family: var(--ld-font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ld-wordmark-mark {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--ld-accent);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.ld-nav-link {
+  position: relative;
+  font-family: var(--ld-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ld-paper-dim);
+  transition: color 0.15s ease;
+}
+.ld-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 1px;
+  background: var(--ld-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ld-nav-link:hover { color: var(--ld-paper); }
+.ld-nav-link:hover::after { transform: scaleX(1); }
+
+/* ---------- buttons ---------- */
+.ld-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ld-accent);
+  color: var(--ld-accent-ink);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 3px;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 3px 3px 0 0 rgba(255, 107, 53, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ld-btn-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 0 rgba(255, 107, 53, 0.3);
+}
+.ld-btn-primary:active {
+  transform: translate(0, 0);
+  box-shadow: 1px 1px 0 0 rgba(255, 107, 53, 0.3);
+}
+
+.ld-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ld-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: var(--ld-paper);
+  border-bottom: 1px solid var(--ld-line-strong);
+  padding-bottom: 2px;
+  transition: border-color 0.2s ease, gap 0.2s ease;
+}
+.ld-btn-secondary:hover {
+  border-color: var(--ld-accent-3);
+  gap: 10px;
+}
+
+/* ---------- eyebrow tag ---------- */
+.ld-tag {
+  font-family: var(--ld-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ld-accent-3);
+  display: inline-block;
+}
+
+/* ---------- section rule (dimension-line divider) ---------- */
+.ld-rule {
+  position: relative;
+  border-top: 1px solid var(--ld-line);
+}
+.ld-rule::before, .ld-rule::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 8px;
+  background: var(--ld-line-strong);
+}
+.ld-rule::before { left: 2rem; }
+.ld-rule::after { right: 2rem; }
+.ld-rule-tag {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ld-bg);
+  padding: 0 14px;
+  font-family: var(--ld-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ld-paper-dim);
+  white-space: nowrap;
+}
+
+/* ---------- cards ---------- */
+.ld-card {
+  position: relative;
+  background: var(--ld-bg-raised);
+  border: 1px solid var(--ld-line);
+  border-radius: 4px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+.ld-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--ld-line-strong);
+}
+.ld-card::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 9px;
+  height: 9px;
+  border-top: 1.5px solid var(--ld-line-strong);
+  border-left: 1.5px solid var(--ld-line-strong);
+}
+.ld-icon-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ld-line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- FAQ ---------- */
+.ld-faq-row {
+  border-bottom: 1px solid var(--ld-line);
+}
+.ld-faq-index {
+  font-family: var(--ld-font-mono);
+  font-size: 12px;
+  color: var(--ld-accent-3);
+  width: 34px;
+  flex-shrink: 0;
+}
+
+/* ---------- title-block CTA panel ---------- */
+.ld-stamp {
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--ld-accent-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-14deg);
+  font-family: var(--ld-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ld-accent-2);
+  text-align: center;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+/* ---------- footer title block ---------- */
+.ld-titleblock {
+  background: var(--ld-bg-deep);
+  border-top: 1px solid var(--ld-line);
+  font-family: var(--ld-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ld-paper-dim);
+}
+.ld-titleblock-cell {
+  border-left: 1px solid var(--ld-line);
+  padding-left: 1rem;
+}
+
+/* ---------- motion ---------- */
+@keyframes ld-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ld-fade-up {
+  animation: ld-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ld-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.ld-blink {
+  animation: ld-blink 1.4s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ld-fade-up, .ld-blink {
+    animation: none !important;
+  }
+}
